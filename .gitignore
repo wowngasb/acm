@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+.vs/
+acm/Debug/
+acm.VC.VC.opendb
+acm.VC.db
+Debug/
