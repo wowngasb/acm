@@ -2,59 +2,68 @@
 #include<string>
 using namespace std;
 
-const int inf = 10;          //无穷大（两点间边权最大为7）
-const int large = 2001;
+const int DISTANCE_INF = 10;          //无穷大 字母最大长度为7  随便大于7的数字都可以
+const int TRUCK_TYPES_MAX = 2001;    // 最大允许的字符串数量  需要加1 因为为了方便 索引是从第一个开始放的
 
-int n;  //truck types
-char str[large][8];
-int dist[large][large] = { 0 };
+char str[TRUCK_TYPES_MAX][8];  // TRUCK_TYPES_MAX 个字符串 用来存放 输入字符串
+int dist[TRUCK_TYPES_MAX][TRUCK_TYPES_MAX] = { 0 };  // TRUCK_TYPES_MAX * TRUCK_TYPES_MAX 的矩阵 用来存放两字符串的距离 
 
-/*Compute Weight*/
-
-int weight(int i, int j)     //返回两个字符串中不同字符的个数（返回边权）
+													 // 比较 left 和 right 中不同的字母个数  长度都为 len
+int weight(char left[], char  right[], unsigned int len)
 {
 	int w = 0;
-	for (int k = 0; k < 7; k++)
-		if (str[i][k] != str[j][k])
+	for (int k = 0; k < len; k++) {
+		if (left[k] != right[k]) {
 			w++;
+		}
+	}
 	return w;
 }
 
 /*Prim Algorithm*/
 
-int prim(void)
+int prim(int types)  // 注意这里 二维数组 第二个参数 需要显式给出
 {
-	int s = 1;       //源点（最初的源点为1）
-	int m = 1;       //记录最小生成树的顶点数
-	bool u[large]; //记录某顶点是否属于最小生成树
 	int prim_w = 0;  //最小生成树的总权值
-	int min_w;     //每个新源点到其它点的最短路
-	int flag_point;
-	int low_dis[large];  //各个源点到其它点的最短路
 
-	memset(low_dis, inf, sizeof(low_dis));
+	bool u[TRUCK_TYPES_MAX]; //记录某顶点是否属于最小生成树
+	int low_dis[TRUCK_TYPES_MAX];  //各个源点到其它点的最短路
+
+								   // 需要用 memset 来初始化
+	memset(low_dis, DISTANCE_INF, sizeof(low_dis));
 	memset(u, false, sizeof(u));
-	u[s] = true;
 
-	while (1)
+	// 2).初始化：Vnew = {x}，其中x为集合V中的任一节点（起始点），Enew = {},为空；
+	int s = 1;
+	u[1] = true;  // 从第一个点开始
+	int m = 1;       //最小生成树已经完成的点数
+
+					 // 3).重复下列操作，直到Vnew = V：
+	while (m < types)
 	{
-		if (m == n)      //当最小生成树的顶点数等于原图的顶点数时，说明最小生成树查找完毕
-			break;
+		int min_w = DISTANCE_INF;   // 初始距离为 DISTANCE_INF
+		int flag_point;  // 最小距离的点
 
-		min_w = inf;
-		for (int j = 2; j <= n; j++)
+						 // a.在集合E中选取权值最小的边<u, v>，其中u为集合Vnew中的元素，而v不在Vnew集合当中，并且v∈V（如果存在有多条满足前述条件即具有相同权值的边，则可任意选取其中之一）；
+		for (int j = 2; j <= types; j++)
 		{
-			if (!u[j] && low_dis[j] > dist[s][j])
-				low_dis[j] = dist[s][j];
-			if (!u[j] && min_w > low_dis[j])
-			{
-				min_w = low_dis[j];
-				flag_point = j;      //记录最小权边中不属于最小生成树的点j
+			if (!u[j]) {  // 需要没有处理过的点
+				if (low_dis[j] > dist[s][j]) {
+					low_dis[j] = dist[s][j];
+				}
+
+				if (min_w > low_dis[j])  // 一定会找到一个点的  因为初始值为 DISTANCE_INF
+				{
+					min_w = low_dis[j];
+					flag_point = j;      // 找到的最小边的另一点
+				}
 			}
 		}
-		s = flag_point;       //顶点j与旧源点合并
-		u[s] = true;          //j点并入最小生成树（相当于从图上删除j点，让新源点接替所有j点具备的特征）
+
+		// b.将v加入集合Vnew中，将<u, v>边加入集合Enew中；
+		u[flag_point] = true;
 		prim_w += min_w;      //当前最小生成树的总权值
+		s = flag_point;  // 下一次  从这个点再开始找下一个点
 		m++;
 	}
 	return prim_w;
@@ -62,24 +71,21 @@ int prim(void)
 
 int main(void)
 {
-	int i, j;
+	int truck_types = 0;  //输入字符串的个数
 
-	while (cin >> n && n)
+	while (cin >> truck_types && truck_types)
 	{
-		/*Input*/
-
-		for (i = 1; i <= n; i++)
+		for (int i = 1; i <= truck_types; i++) {  // 注意 是从索引 1 开始的
 			cin >> str[i];
+		}
 
-		/*Structure Maps*/
+		for (int i = 1; i <= truck_types - 1; i++) {  // 注意 是从索引 1 开始的
+			for (int j = i + 1; j <= truck_types; j++) {
+				dist[i][j] = dist[j][i] = weight(str[i], str[j], 7);  // 计算两两之间距离  放入矩阵
+			}
+		}
 
-		for (i = 1; i <= n - 1; i++)
-			for (j = i + 1; j <= n; j++)
-				dist[i][j] = dist[j][i] = weight(i, j);
-
-		/*Prim Algorithm & Output*/
-
-		cout << "The highest possible quality is 1/" << prim() << '.' << endl;
+		cout << "The highest possible quality is 1/" << prim(truck_types) << '.' << endl;
 
 	}
 	return 0;
