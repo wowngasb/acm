@@ -14,7 +14,7 @@ int dist[large][large] = { 0 };
 int weight(int i, int j)     //返回两个字符串中不同字符的个数（返回边权）
 {
 	int w = 0;
-	for (int k = 0; k<7; k++)
+	for (int k = 0; k < 7; k++)
 		if (str[i][k] != str[j][k])
 			w++;
 	return w;
@@ -44,9 +44,9 @@ int prim(void)
 		min_w = inf;
 		for (int j = 2; j <= n; j++)
 		{
-			if (!u[j] && low_dis[j]>dist[s][j])
+			if (!u[j] && low_dis[j] > dist[s][j])
 				low_dis[j] = dist[s][j];
-			if (!u[j] && min_w>low_dis[j])
+			if (!u[j] && min_w > low_dis[j])
 			{
 				min_w = low_dis[j];
 				flag_point = j;      //记录最小权边中不属于最小生成树的点j
