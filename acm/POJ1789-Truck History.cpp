@@ -20,9 +20,17 @@ int weight(char left[], char  right[], unsigned int len)
 	return w;
 }
 
-/*Prim Algorithm*/
+/*
+算法描述编辑
+1).输入：一个加权连通图，其中顶点集合为V，边集合为E；
+2).初始化：Vnew = {x}，其中x为集合V中的任一节点（起始点），Enew = {},为空；
+3).重复下列操作，直到Vnew = V：
+a.在集合E中选取权值最小的边<u, v>，其中u为集合Vnew中的元素，而v不在Vnew集合当中，并且v∈V（如果存在有多条满足前述条件即具有相同权值的边，则可任意选取其中之一）；
+b.将v加入集合Vnew中，将<u, v>边加入集合Enew中；
+4).输出：使用集合Vnew和Enew来描述所得到的最小生成树。
+*/
 
-int prim(int types)  // 注意这里 二维数组 第二个参数 需要显式给出
+int prim(int types)
 {
 	int prim_w = 0;  //最小生成树的总权值
 
